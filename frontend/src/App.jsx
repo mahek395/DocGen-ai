@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createJob, getJob, getApiUrl } from "./api/jobApi";
+import { createJob, getJob, getApiUrl } from "./api/jobAPI";
 import { downloadMarkdown } from "./utils/downloadMarkdown";
 import MarkdownRenderer from "./components/MarkdownRenderer";
 import {

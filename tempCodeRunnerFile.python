@@ -1,0 +1,167 @@
+from collections import deque
+import heapq
+
+# ---------------- GRAPH ----------------
+graph = {
+    'A': [('B', 1), ('C', 4)],
+    'B': [('D', 2), ('E', 5)],
+    'C': [('F', 1)],
+    'D': [],
+    'E': [('F', 1)],
+    'F': []
+}
+
+# For BFS / DFS / DLS / IDDFS / Bidirectional (ignore weights)
+simple_graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F'],
+    'D': [],
+    'E': ['F'],
+    'F': []
+}
+
+# ---------------- BFS ----------------
+def bfs(start, goal):
+    q = deque([[start]])
+    visited = set([start])
+
+    while q:
+        path = q.popleft()
+        node = path[-1]
+
+        if node == goal:
+            return path
+
+        for neigh in simple_graph[node]:
+            if neigh not in visited:
+                visited.add(neigh)
+                q.append(path + [neigh])
+    return None
+
+
+# ---------------- DFS ----------------
+def dfs(start, goal):
+    stack = [(start, [start])]
+    visited = set()
+
+    while stack:
+        node, path = stack.pop()
+        if node == goal:
+            return path
+        if node not in visited:
+            visited.add(node)
+            for neigh in reversed(simple_graph[node]):
+                stack.append((neigh, path + [neigh]))
+    return None
+
+
+# ---------------- UNIFORM COST SEARCH ----------------
+def uniform_cost(start, goal):
+    pq = [(0, start, [start])]
+    visited = set()
+
+    while pq:
+        cost, node, path = heapq.heappop(pq)
+
+        if node == goal:
+            return path, cost
+
+        if node not in visited:
+            visited.add(node)
+            for neigh, w in graph[node]:
+                heapq.heappush(pq, (cost + w, neigh, path + [neigh]))
+    return None
+
+
+# ---------------- DEPTH LIMITED SEARCH ----------------
+def dls(node, goal, limit, path, visited):
+    if node == goal:
+        return path
+    if limit == 0:
+        return None
+
+    visited.add(node)
+    for neigh in simple_graph[node]:
+        if neigh not in visited:
+            res = dls(neigh, goal, limit - 1, path + [neigh], visited)
+            if res:
+                return res
+    return None
+
+
+# ---------------- IDDFS ----------------
+def iddfs(start, goal, max_depth):
+    for depth in range(max_depth + 1):
+        visited = set()
+        res = dls(start, goal, depth, [start], visited)
+        if res:
+            return res
+    return None
+
+
+# ---------------- BIDIRECTIONAL BFS ----------------
+def bidirectional(start, goal):
+    if start == goal:
+        return [start]
+
+    q1 = deque([start])
+    q2 = deque([goal])
+    p1 = {start: None}
+    p2 = {goal: None}
+
+    while q1 and q2:
+        meet = expand(q1, p1, p2, simple_graph)
+        if meet:
+            return build_path(meet, p1, p2)
+
+        meet = expand(q2, p2, p1, reverse_graph(simple_graph))
+        if meet:
+            return build_path(meet, p1, p2)
+
+    return None
+
+
+def expand(queue, parents, other_parents, g):
+    node = queue.popleft()
+    for neigh in g[node]:
+        if neigh not in parents:
+            parents[neigh] = node
+            queue.append(neigh)
+            if neigh in other_parents:
+                return neigh
+    return None
+
+
+def build_path(meet, p1, p2):
+    path1 = []
+    n = meet
+    while n:
+        path1.append(n)
+        n = p1[n]
+    path1.reverse()
+
+    path2 = []
+    n = p2[meet]
+    while n:
+        path2.append(n)
+        n = p2[n]
+
+    return path1 + path2
+
+
+def reverse_graph(g):
+    rg = {k: [] for k in g}
+    for u in g:
+        for v in g[u]:
+            rg[v].append(u)
+    return rg
+
+
+# ---------------- TEST ----------------
+print("BFS:", bfs('A', 'F'))
+print("DFS:", dfs('A', 'F'))
+print("UCS:", uniform_cost('A', 'F'))
+print("DLS (limit=3):", dls('A', 'F', 3, ['A'], set()))
+print("IDDFS:", iddfs('A', 'F', 5))
+print("Bidirectional:", bidirectional('A', 'F'))
