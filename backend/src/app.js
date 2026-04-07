@@ -9,8 +9,20 @@ import cors from "cors";
 dotenv.config();
 
 const app = express();
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://doc-gen-ai-u1v5.vercel.app",
+  "https://doc-gen-ai-u1v5-dl41y4rtk-mahekshah395-8301s-projects.vercel.app"
+];
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST"],
   credentials: true
 }));
