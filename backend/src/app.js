@@ -9,6 +9,7 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
+  "http://localhost",
   "http://localhost:5173",
   "https://doc-gen-ai-u1v5.vercel.app",
   "https://doc-gen-ai-u1v5-dl41y4rtk-mahekshah395-8301s-projects.vercel.app",

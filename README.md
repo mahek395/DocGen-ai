@@ -83,11 +83,68 @@ project/
     └── package.json
 ```
 
-## 🚀 Getting Started
+## 🐳 Running with Docker
+
+The entire application stack can be run with a single command using Docker Compose. This is the recommended way to run the project locally.
+
+### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+### Setup
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/mahek395/DocGen-ai.git
+   cd DocGen-ai
+   ```
+
+2. Create a root `.env` file with your database credentials
+   ```bash
+   DB_PASSWORD=your_mysql_password
+   DB_NAME=ai_doc_generator
+   ```
+
+3. Create `backend/.env` with all required variables
+   ```bash
+   PORT=5000
+   DB_HOST=mysql
+   DB_USER=root
+   DB_PASSWORD=your_mysql_password
+   DB_NAME=ai_doc_generator
+   REDIS_HOST=redis
+   REDIS_PORT=6379
+   CORS_ORIGIN=http://localhost
+   OPENROUTER_API_KEY=your_openrouter_api_key
+   ```
+
+4. Start all services
+   ```bash
+   docker compose up
+   ```
+
+The app will be available at `http://localhost`.
+
+### Services
+
+| Service | Description | Port |
+|---------|-------------|------|
+| frontend | React app served via Nginx | 80 |
+| backend | Express API server | 5000 |
+| worker | BullMQ background job processor | - |
+| mysql | Job and document storage | 3306 |
+| redis | Queue backend for BullMQ | 6379 |
+
+### Notes
+- MySQL and Redis health checks ensure the backend and worker only start once the databases are ready
+- The worker runs as a separate container using the same backend image, overriding the start command
+- On first run, `init.sql` is automatically executed to create the required database schema
+- To reset all data and reinitialize the database: `docker compose down -v && docker compose up`
+
+## 🚀 Getting Started (Manual Setup)
 
 ### Prerequisites
 
-- **Node.js** (v18 or higher)
+- **Node.js** (v20 or higher)
 - **MySQL** (v8 or higher) - for job and document storage
 - **Redis** (v6 or higher) - for queue management
 - **Git** - for repository cloning
@@ -98,32 +155,25 @@ project/
 #### 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
-cd project
+git clone https://github.com/mahek395/DocGen-ai.git
+cd DocGen-ai
 ```
 
 #### 2. Backend Setup
 
-Navigate to the backend directory:
-
 ```bash
 cd backend
-```
-
-Install dependencies:
-
-```bash
 npm install
 ```
 
-Create a `.env` file in the backend directory with the following variables:
+Create a `.env` file in the backend directory:
 
 ```env
 # MySQL Configuration
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_password
-DB_NAME=doc_generator
+DB_NAME=ai_doc_generator
 
 # Redis Configuration
 REDIS_HOST=localhost
@@ -134,19 +184,15 @@ OPENROUTER_API_KEY=your_openrouter_api_key
 
 # Server Port
 PORT=5000
+
+# CORS
+CORS_ORIGIN=http://localhost:5173
 ```
 
 #### 3. Frontend Setup
 
-Navigate to the frontend directory:
-
 ```bash
 cd ../frontend
-```
-
-Install dependencies:
-
-```bash
 npm install
 ```
 
@@ -161,16 +207,20 @@ VITE_API_URL=http://localhost:5000
 Create the MySQL database and tables:
 
 ```sql
-CREATE DATABASE IF NOT EXISTS doc_generator;
+CREATE DATABASE IF NOT EXISTS ai_doc_generator;
 
-USE doc_generator;
+USE ai_doc_generator;
 
 CREATE TABLE IF NOT EXISTS jobs (
-  id VARCHAR(36) PRIMARY KEY,
-  repo_url VARCHAR(255) NOT NULL,
-  status VARCHAR(20) DEFAULT 'pending',
+  id CHAR(36) PRIMARY KEY,
+  repo_url TEXT NOT NULL,
+  status ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending',
   progress INT DEFAULT 0,
-  documents JSON,
+  result_path TEXT,
+  error_message TEXT,
+  result LONGTEXT,
+  readme_md LONGTEXT,
+  developer_guide_md LONGTEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -178,16 +228,12 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 ### Running the Application
 
-#### Development Mode
-
 **Terminal 1 - Backend Server:**
 
 ```bash
 cd backend
 npm run dev
 ```
-
-The backend server will run on `http://localhost:5000`
 
 **Terminal 2 - Background Worker:**
 
@@ -204,23 +250,6 @@ npm run dev
 ```
 
 The frontend will run on `http://localhost:5173`
-
-#### Production Mode
-
-**Backend:**
-
-```bash
-cd backend
-npm start
-```
-
-**Frontend:**
-
-```bash
-cd frontend
-npm run build
-npm run preview
-```
 
 ## 📚 API Documentation
 
@@ -271,7 +300,7 @@ npm run preview
 1. **Job Creation**: User submits a GitHub repository URL
 2. **Queue Processing**: Job is added to BullMQ queue with Redis backend
 3. **Repository Cloning**: Background worker clones the repository
-4. **Analysis Phase**: 
+4. **Analysis Phase**:
    - Detects repository type and tech stack
    - Identifies entry points and routing
    - Analyzes database schemas
@@ -329,14 +358,15 @@ npm run preview
 ## 📝 Environment Variables
 
 ### Backend (.env)
-- `DB_HOST` - MySQL host (default: localhost)
+- `DB_HOST` - MySQL host (use `mysql` when running with Docker)
 - `DB_USER` - MySQL username
 - `DB_PASSWORD` - MySQL password
 - `DB_NAME` - Database name
-- `REDIS_HOST` - Redis host (default: localhost)
+- `REDIS_HOST` - Redis host (use `redis` when running with Docker)
 - `REDIS_PORT` - Redis port (default: 6379)
 - `OPENROUTER_API_KEY` - Your OpenRouter API key
 - `PORT` - Server port (default: 5000)
+- `CORS_ORIGIN` - Allowed frontend origin
 
 ## 🎨 Features in Detail
 
