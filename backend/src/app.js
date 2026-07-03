@@ -11,7 +11,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost",
   "http://localhost:5173",
-  "https://doc-gen-ai-tau.vercel.app/"
+  "https://doc-gen-ai-tau.vercel.app"
 ];
 
 app.use(cors({
