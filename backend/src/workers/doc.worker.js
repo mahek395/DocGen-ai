@@ -16,7 +16,7 @@ import {
   generateFolderTree
 } from "../utils/repoAnalysis.js";
 import { generateDocumentation } from "../utils/openRouterAPI.js";
-import { splitDocuments } from "../utils/splitDocuments.js"; // ✅ USE SHARED UTILITY
+import { splitDocuments } from "../utils/splitDocuments.js"; 
 import fs from "fs";
 import path from "path";
 import os from "os";
@@ -92,6 +92,8 @@ const worker = new Worker(
       console.log("✨ Generating documentation with AI...");
 
       const documentation = await generateDocumentation(analysis);
+      console.log("📝 RAW AI OUTPUT LENGTH:", documentation?.length);
+console.log("📝 RAW AI OUTPUT PREVIEW:", documentation?.slice(0, 500));
 
       const { readme, developerGuide } = splitDocuments(documentation);
 
