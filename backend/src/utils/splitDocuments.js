@@ -8,12 +8,12 @@ export function splitDocuments(markdown) {
 
   // Match README section
   const readmeMatch = content.match(
-    /^#\s*README\.md[\s\S]*?(?=^#\s*DEVELOPER_GUIDE\.md)/m
+    /^#{1,3}\s*README\.md[\s\S]*?(?=^#{1,3}\s*DEVELOPER_GUIDE\.md)/m
   );
 
   // Match Developer Guide section
   const devMatch = content.match(
-    /^#\s*DEVELOPER_GUIDE\.md[\s\S]*/m
+    /^#{1,3}\s*DEVELOPER_GUIDE\.md[\s\S]*/m
   );
 
   return {
