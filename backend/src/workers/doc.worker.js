@@ -92,8 +92,7 @@ const worker = new Worker(
       console.log("✨ Generating documentation with AI...");
 
       const documentation = await generateDocumentation(analysis);
-      console.log("📝 RAW AI OUTPUT LENGTH:", documentation?.length);
-console.log("📝 RAW AI OUTPUT PREVIEW:", documentation?.slice(0, 500));
+      
 
       const { readme, developerGuide } = splitDocuments(documentation);
 

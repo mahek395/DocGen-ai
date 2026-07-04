@@ -213,8 +213,6 @@ Return BOTH documents in VALID MARKDOWN.
       }
     ]
   });
-  console.log("🔍 RAW RESPONSE:", JSON.stringify(response, null, 2));
-  console.log("🔍 CONTENT LENGTH:", response?.choices?.[0]?.message?.content?.length);
-  
+ 
   return response.choices[0].message.content;
 }
