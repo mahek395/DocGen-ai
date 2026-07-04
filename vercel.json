@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "doc-gen-ai-tau.vercel.app"
+        }
+      ],
+      "destination": "https://doc-gen-ai-u1v5.vercel.app/$1",
+      "permanent": true
+    }
+  ]
+}
